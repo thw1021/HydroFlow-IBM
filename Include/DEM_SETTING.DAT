@@ -1,0 +1,98 @@
+~~~~The start of DEM setting reading~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     I_IPKPDEM       I_BCDEM  I_SOFTMODULE   I_FCOUPLING   I_ACHIVEDEM
+             1             1             1             1             1
+
+   I_IPJPKPDEM        I_MOVE        I_TRAN         I_ROT         I_GRA
+             1             1             1             1             1   
+                        
+          TDEM         ISDEM         IFLOW    DEMRESTART       IDEMRES
+         1.E-4           100          1000    COLD START             0
+
+         I_PTF         I_FTP       DRAGMOD         CDMOD        
+             1             1          MOD2          MOD1
+          
+        MPTMOD        CFKDEM       CFWDEM1       CFWDEM2
+          MOD1           1.0         0.075        0.0828
+
+       ROLLMOD     ROLLBOUND        CONMOD
+          CON1          BOD2            M3 
+            
+      PKN_M1PP      PKN_M1PW       EN_M1PP       EN_M1PW   
+        1.0E+3        1.0E+3           0.5           0.5
+
+       RK_M1PP       RK_M1PW       RC_M1PP       RC_M1PW
+           0.4           0.4           0.5           0.5    
+                       
+         PMIUS       PMIUSPW         RMIUS       RMIUSPW
+        5.0E-1        5.0E-1        1.0E-3        1.0E-3
+        
+     C_VIRTUAL     RHO_FLUID  RHO_PARTICLE     I_CV_PORE        MOD_FA
+           2.0         998.2            0.             1      IMPLICIT
+           
+         R_ED1         R_ED2         R_ED3
+           2.5           0.5           1.5
+
+      R_SIGMA1      R_SIGMA2      R_SIGMA3
+           3.0           3.0           3.0
+           
+         PSMOD           NSH           NSV    
+          MOD2             3             3
+
+        BCDMOD         NREAD    I_TIMESAVE     IP_RANDOM                      
+          MOD2     100000000             1             0
+                                              
+    N_CYLINDER
+             0             
+             
+    X_CYLINDER    Y_CYLINDER    Z_CYLINDER    R_CYLINDER             
+           0.1           0.1           0.1           0.1
+
+~~~~The end of DEM setting reading~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~           
+
+参数描述:  
+	I_IPKPDEM：       I_BCDEM  I_SOFTMODULE   I_FCOUPLING   I_ACHIVEDEM
+               
+	TDEM: DEM时间步长
+	ISDEM: DEM计算结果保存间隔步数
+	I_PTF: 颗粒对流体作用力(1:考虑, 0:忽略)
+	I_FTP: 流体对颗粒作用力(1:考虑, 0:忽略) 
+	I_MOVE:	颗粒平移运动(1:考虑, 0:忽略)
+	I_ROT：颗粒旋转运动	(1:考虑, 0:忽略)
+	I_GRA：是否考虑重力(1:考虑, 0:忽略)
+		
+	ROLLMOD：滚阻模型(NONE：不考虑滚阻力矩，CON1：常力矩模型1，CON2：常力矩模型2，
+	                  VIS1：粘性模型1，VIS1：粘性模型2)
+	ROLLBOUND：有界限制(NONE：无限制，BOD1：有界常力矩模型1，BOD2：有界常力矩模型2)
+	
+	CONMOD: 碰撞模型系数确定方法 (M1:给定, M2:公式计算(孙其诚2008)，M3:公式计算(maeno2009)) 
+	PKN_M1PP：径向弹性系数(颗粒间碰撞)      
+	PKN_M1PW：径向弹性系数(颗粒与壁面碰撞)        
+	EN_M1PP：径向恢复系数(颗粒间碰撞)       
+	EN_M1PW：径向恢复系数(颗粒与壁面碰撞) 
+	RK_M1PP：切向与径向弹性系数比值(颗粒间碰撞)
+	RK_M1PW：切向与径向弹性系数比值(颗粒与壁面碰撞)
+	RC_M1PP：切向与径向恢复系数比值(颗粒间碰撞)
+	RC_M1PW：切向与径向恢复系数比值(颗粒与壁面碰撞)
+	
+	PMIUS: 颗粒间滑动摩擦系数
+	PMIUSPW: 颗粒与壁面滑动摩擦系数  
+	RMIUS: 颗粒间滚动摩擦系数
+	RMIUSPW: 颗粒与壁面滚动摩擦系数
+	C_VIRTUAL: 虚拟/附加质量力系数  
+	RHO_FLUID：指定流体密度(程序中其值大于0.1则按给定值确定流体密度，小于0.1则采用程序默认值)
+	I_CV_PORE: 多孔介质虚拟/附加质量力系数修正(1:修正，0：不修正) 
+  R_ED1：环境流速影响域半径与粒径比
+  R_ED2：颗粒体积分配域半径与粒径比
+  R_ED3：颗粒阻力分配域半径与粒径比	 
+  R_SIGMA1：环境流速影响域核函数带宽与粒径比   
+  R_SIGMA2：颗粒体积分配域核函数带宽与粒径比
+  R_SIGMA3：颗粒阻力分配域核函数带宽与粒径比
+  PSMOD：颗粒接触高效搜索模式(NONE：遍历搜索；MOD1：流场背景网格搜索模式；MOD2：均匀正交背景网格搜索模式)
+  NSH：PSMOD=1时水平网格搜索层数          
+  NSV：PSMOD=1时垂向网格搜索层数
+  
+  BCDMOD: MOD1: 侧壁平直，床底可不平；MOD2：所有壁面均平直
+                 
+  I_TIMESAVE:是否存储DEM各模块计算耗时，1：是，2：否    
+  IP_RANDOM：计算开始前是否随机分配颗粒顺序，1：是，2：否    
+  MOD_FA：DEM虚拟质量力离散方式：显式：IMPLICIT，隐式：EXPLICIT或其他                          

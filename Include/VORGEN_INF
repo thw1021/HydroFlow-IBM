@@ -1,0 +1,85 @@
+C##########################################################################C                          
+C                      variants definitions for vortex generation          C
+C                          version 1.0                                     C
+C                   by Zhang Jingxin (04/01/2019)                          C
+C##########################################################################C
+C------------------------------------------------------------------------------------C
+C         Defining the characteristic parameters                                     c
+c------------------------------------------------------------------------------------c
+
+C        Implicit Double precision (A-H,O-Z)
+C	    Implicit Integer (I-N)
+	
+c-----  Normolizating characteristic spatial and tempral scales
+     
+        Parameter (NUM_CELL = 1440,NUM_VER = 84,IPLANE = 12)          ! Number of points
+     
+        Parameter (BH = 0.2, ZL = -0.12, ZR = 0.12,   ! Characteristic scale
+     &            UNIT_VEL = 0.25, VEL_STAR = 0.011)
+     	
+     	Parameter (DWINTERFACE = 9.0E-3)
+
+C         ! Characteristic sizes and convection velocity of each MODE
+        Parameter(P1_X_PLUX = 100.0,P1_Y_PLUX = 20,P1_Z_PLUX=60,
+     &            C1PLUX=15)
+        Parameter(P2_X_PLUX = 120.0,P2_Y_PLUX = 60,P2_Z_PLUX=60,
+     &            C2PLUX=15)
+        Parameter(P2S_X_PLUX = 60.0,P2S_Y_PLUX = 60,P2S_Z_PLUX=120,
+     &           C2SPLUX=15)
+        Parameter(P3_X_PLUX = 0.1,P3_Y_PLUX = 0.1,P3_Z_PLUX=0.1,
+     &           C3PLUX=0.8)
+        Parameter(P4_X_PLUX = 0.15,P4_Y_PLUX = 0.15,P4_Z_PLUX=0.15,
+     &           C4PLUX=0.8)
+     
+c-----  Normolizing the heights of different zones for every modes    
+ 
+        Parameter(P1_LOW_PLUX = 20, P1_UP_PLUX = 60,
+     &           P2_LOW_PLUX = 60, P2_UP_PLUX = 0.4,
+     &           P2S_LOW_PLUX = 0.4, P2S_UP_PLUX = 0.5,
+     &           P3_LOW_PLUX = 0.5, P3_UP_PLUX = 0.8,
+     &           P4_LOW_PLUX = 0.8, P4_UP_PLUX = 1.0)
+     
+C-----  Dimensional scales of each MODE  --------------------------------------------C
+
+        Common/Length/P1_LX,P1_LY,P1_LZ,P1_T,    
+     &               P2_LX,P2_LY,P2_LZ,P2_T,
+     &               P2S_LX,P2S_LY,P2S_LZ,P2S_T, 
+     &               P3_LX,P3_LY,P3_LZ,P3_T, 
+     &               P4_LX,P4_LY,P4_LZ,P4_T,
+     &               P1_LOW,P1_UP,P2_LOW,P2_UP,P2S_LOW,P2S_UP,
+     &               P3_LOW,P3_UP,P4_LOW,P4_UP,C1,C2,C2S,C3,C4
+     
+        ! Array defined for each structure spot  
+        
+        Common/Location/SP1_DEFINE(10000,3),
+     &                 SP2_DEFINE(10000,3),
+     &                 SP2S_DEFINE(10000,3),
+     &                 SP3_DEFINE(10000,3),
+     &                 SP4_DEFINE(10000,3),
+     &                 SR1(10000,3),SR2(10000,3),SR22(10000,3),
+     &                 SR3(10000,3),SR4(10000,3)
+
+       !  Seed of random sign generating
+       
+        Common/Seed/RT1(10000),RY1(10000),RZ1(10000),
+     &             RT2(10000),RY2(10000),RZ2(10000),
+     &             RT2S(10000),RY2S(10000),RZ2S(10000),
+     &             RT3(10000),RY3(10000),RZ3(10000),
+     &             RT4(10000),RY4(10000),RZ4(10000),
+     &             SR3S(10000,3),SR4S(10000,3),
+     &             RP1(3),RP2(3),RP2S(3),RP3(3),RP4(3),
+     &             SR1S(10000,3),SR2S(10000,3),SR2SS(10000,3)
+     
+        Common/Array/YCEN(NUM_CELL,NUM_VER), ZCEN(NUM_CELL,NUM_VER), 
+     &          U_FLU(NUM_CELL,NUM_VER),V_FLU(NUM_CELL,NUM_VER),
+     &          W_FLU(NUM_CELL,NUM_VER),UDIS(NUM_CELL,NUM_VER),
+     &          VDIS(NUM_CELL,NUM_VER),WDIS(NUM_CELL,NUM_VER),
+     &          R11(NUM_CELL,NUM_VER),R22(NUM_CELL,NUM_VER),
+     &          R33(NUM_CELL,NUM_VER),R21(NUM_CELL,NUM_VER),
+     &          R31(NUM_CELL,NUM_VER),R32(NUM_CELL,NUM_VER),
+     &          UDIS2(NUM_CELL,NUM_VER),
+     &          VDIS2(NUM_CELL,NUM_VER),WDIS2(NUM_CELL,NUM_VER),
+     &          ID_CELL_EDGE(NUM_CELL),ID_CELL(NUM_CELL)    
+
+
+

@@ -1,0 +1,323 @@
+C##########################################################################C                          
+C                      variants definitions                                C
+C                          version 1.0                                     C
+C                   by Zhang Jingxin (22/04/2009)                          C
+C##########################################################################C
+c>>>>> obay parameters
+   	  Implicit Double precision (A-H,O-Z)
+	  Implicit Integer (I-N)
+	  Parameter (IJM=10000,IJE=20200,IJP=10201,KB=21,KSL=6)
+      Parameter (KBM=KB-1,IPOLYGEN=4,IJC=10,IAST=11,NTHREAD=6)
+	  Parameter (ITIDAL=10,IWAVE=0,ISLIP=1,IFLUME=0,N_SOURCE=0)
+      Parameter (WAVE_BREAKING = 0.0)
+      Parameter (ITK = 1,Dia=6E-3,CDC=2.5)
+      Parameter (IJM_DYN_B = 1, IJM_DYN_E = IJM)
+      Parameter (IWENOSCHEME = 0)
+      Parameter (IH_TVD = 8, IV_TVD = 8)
+c      Parameter (L_DEGREE = IWENO * (IWENO + 1) / 2 - 1)
+c--DEM parameters-----------------------------------------------------c
+  	  Parameter (NPARTICLE=10,NPARTICLE1=0)
+	  Parameter (I_PARTICLE = NPARTICLE + NPARTICLE1)
+	  Parameter (I_CPN = 1000,acdem = 1.e-25)
+	  Parameter (N_PSLEV = 1)
+	  Parameter (NL=50,ICPMAX=1,NP_CONTACT=1E+7)
+	  Parameter (IBCPMAX1=10,IBCPMAX2=0,IBCPMAX3=0)
+	  Parameter (IBCPMAX4=0,IBCPMAX5=0)
+	  Parameter (XBMIN=-0.0E-3, YBMIN=-1.5E-1, ZBMIN=-1.50E-1)
+	  Parameter (NBX1=260, NBY1=60, NBZ1=40, DELBM1=5.0000E-3)
+	  Parameter (NBX2=0, NBY2=0, NBZ2=0, DELBM2=0.0000E-2)
+	  Parameter (NBX3=0, NBY3=0, NBZ3=0, DELBM3=0.0000E-1)
+	  Parameter (NBX4=0, NBY4=0, NBZ4=0, DELBM4=0.0000E-3)
+	  Parameter (NBX5=0, NBY5=0, NBZ5=0, DELBM5=0.0000E-3)
+	  Parameter (NBL1=NBX1*NBY1*NBZ1,NBL2=NBX2*NBY2*NBZ2)
+	  Parameter (NBL3=NBX3*NBY3*NBZ3,NBL4=NBX4*NBY4*NBZ4)
+	  Parameter (NBL5=NBX5*NBY5*NBZ5,NBL=NBL1+NBL2+NBL3+NBL4+NBL5)
+c========added by Wang Jian ==========================================c
+c--Intantaneous output------------------------------------------------c
+	  Parameter (IVEL_INS=1,NGAUGE=101)
+c--Save as binary file	----------------------------------------------c	  
+	  Parameter (ISAVE_BIN=0) 
+c--Averaging ---------------------------------------------------------c
+	  Parameter (IAVESAVE=0,IAVEVEL=1,IAVERYN=0)	   	 	  
+	  Parameter (NSTART=3000,IAVEHOT=0)	
+c--Msigma and submerged structures------------------------------------c 
+	  Parameter (ISTRUCTURE=0,NUM_KS_EDGE=40,NUM_KS_CELL=16)
+	  Parameter (KB_STRUCT=11,KB_STRUCB=16)
+	  Parameter (KBM_STRUCT=KB_STRUCT,KBM_STRUCB=KB_STRUCB-1)
+	  Parameter (IMSIGMA=0,KB_SIGMAT=10,KB_SIGMAB=18,IJ_TEST=12)
+c--Consistent BC and type of BC at walls------------------------------c	  
+	  Parameter (IBC_CONSISTENT=0)
+	  Parameter (IBC_TDISS_WALL=1,RKS=3.0E-6)	
+C--Improved SST-k-w model---------------------------------------------c	    
+	  PARAMETER (ISST_IMPROVE=0)
+C--Concentration source input-----------------------------------------c
+      PARAMETER (NUM_C=2,IREADC=1)
+c========added by Wang Jian ==========================================c
+
+      
+c----- eptsm is the total reference stations for time series
+c----- ebcm is the total number of open boundary points
+c----- ihistm and itracm are the total number for the averaging 
+c----- period for output.
+C==========================================================================c	  
+      Integer IHISTM,ITRACM,EPTSM,VPTSM,FPTSM,EBCM,QBCM,DBCM,
+     .        VBCM,ABCM 
+      Parameter (IHISTM=1000,ITRACM=30)
+      Parameter (EPTSM=100 ,VPTSM=100, FPTSM=100)
+      Parameter (EBCM=1000,QBCM=1000,DBCM=1000,VBCM=1000,ABCM=1000)
+	  Parameter (THITA=0.5)
+	  Double precision KM,KH,KQ,KMV,KM_TOP
+      Integer EPTS,VPTS,FPTS
+      Logical CONSPLT,CONSTSR
+	  Character*2  CONMOD
+      Character*4  ROLLMOD,ROLLBOUND,PSMOD,BCDMOD,DRAGMOD,CDMOD,MPTMOD,
+     .             DIRFLX,BICTRL,BNFLUX
+      Character*7  WIND,WAVEDYN,SEDTRAN,TFIELD,THINDAM,SFIELD,WAQ,
+     .	           CORLIS,DES,DEM,POREMODULE,MODULEIBM
+      Character*10 HYDTYPE,WFBC,DEMRESTART
+      Character*10 TOR,ADVECT,HORZMIX,VERTMIX,UNIFORM,SGSTYPE
+      Character*20 OPTEBC 
+      Character*8  NAMEEBC,NAMEVBC,NAMEQBC,NAMEDBC,NAMEAST,MOD_FA
+C==========================================================================C  
+C-------------------- name of files  --------------------------------------c
+      Common/namefile/
+     .     NAMEEBC,NAMEVBC,NAMEQBC,NAMEDBC,NAMEAST
+c-------------------- variables  ------------------------------------------c
+      Common/blkcon/
+     .     DTI,UMOL,GRAV,RAMP,HORCON,VERCON,TIME,THOUR,UNICON,
+     .     ISTART,IEND,NSTEP,IPRINT,IAVGE,ISKILL,ISPLIT,
+     .     IUT90,IUT91,IUT92,IUT93,IUT94,IUT95,IUT96,IUT97,IUT98,
+     .     IUT99,IUT101,NUM_GHOST,
+     .	   NUMQBC,NUMDBC,IHOTSTART,EPTS,VPTS,FPTS,NUMEBC,IUTSR,
+     .     IUGRD,IUCUV,IUPRT,IYR,IMO,IDA,IHR,ITF,ITSEDC,ITSEDB,
+     .     ITTEM,ITSAL,ITWAQ,NUMVBC,NUMAST,INDEX_SGS,ISAVE,ITC,
+     .     IUINS,IVINS,IWINS,ITF_BIN,ITC_BIN,IUPRT_DEM      
+c-------------------- geometry of cells  ----------------------------------c
+	  Integer CELL_POLYGEN,CELL_SIDE,POINT_CELL,INDEX_POINT,CELL_INDEX
+      Common/blkcell/
+     .     CELL_POLYGEN(IJM),CELL_SIDE(IJM,IPOLYGEN,4),
+     .     POINT_CELL(IJP),IGEN(N_SOURCE),
+     .	   INDEX_POINT(IJP,IJC),CELL_INDEX(IJM,IPOLYGEN)
+      Common/blkcell2/CELL_CUV(IJM,IPOLYGEN,8),DISCOE(IJM,IPOLYGEN,8)
+c-------------------- 1-d arrays ------------------------------------------C
+      Common/blk1d/
+     .     DZR(KB),Z(KB),ZZ(KB),DZ(KB),DZZ(KB),ELF(IJM),EL(IJM),
+     .     Z01(IJM),CBC(IJM),CCM(IJM),CFM(IJE),AREA(IJM),
+     .     UAVE(IJM),VAVE(IJM),COR(IJM),ELFM(IJE),DHT(IJM),D2D(IJM)
+c-------------------- 2-d arrays ------------------------------------------C
+      Common/blk2d/
+     .     PXY(IJP,2),CXY(IJM,2),DC(IJM),HC(IJM),TBX(IJM),TBY(IJM),
+     .     WTSURF(IJM,2),U(IJM,KB),V(IJM,KB),W(IJM,KB),PN(IJM,KB),
+     .     WTBOT(IJM,2),UR(IJM,KB),VR(IJM,KB),WR(IJM,KB),ESTARV(IJP),
+     .     URV(IJP,KB),VRV(IJP,KB),WRV(IJP,KB),ESTAR(IJM),PNV(IJP,KB),
+     .     UN(IJE,KB),VN(IJE,KB),VIS_BW(IJM,KBM),
+     .     UV(IJP,KB),VV(IJP,KB),WV(IJP,KB),ELFV(IJP),HP(IJP),
+     .     WUSURF(IJM),WVSURF(IJM),QZ_INTER(KB,3),W_INTER(KB,3),
+     .     USTAR(IJM,KB),VSTAR(IJM,KB),DS(IJE),HS(IJE),
+     .     AAM(IJM,KB),KM(IJM,KB),KH(IJM,KB),KQ(IJM,KB),VIS(IJM,KB),
+     .     VISV(IJP,KB),TKE(IJM,KB),TKEV(IJP,KB),TKERV(IJP,KB),
+     .     KMV(IJP,KB),VORTICITY(IJM,KB),VORTICITYV(IJP,KB),
+     .     VORX(IJM,KB),VORY(IJM,KB), VORZ(IJM,KB),PT(IJM,KB),
+     . 	   RCOE(IJP,IJC),PTV(IJP,KB),EDGE_DIR(IJE,2),VORXV(IJP,KB),
+     . 	   VORYV(IJP,KB),VORZV(IJP,KB),OMIGAV(IJP,KB),TENSOR(IJM,KB),
+     . 	   TENSORV(IJP,KB),TDISS(IJM,KB),QZ_INTER_D(KB,3),DV(IJP),
+     .     TDISSV(IJP,KB),TDISSRV(IJP,KB),C(IJM,KB),CV(IJP,KB),
+     .     CRV(IJP,KB),WB_MASK(IJM),STRESS(IJM,KB,9),STRESSV(IJP,KB,9),
+     .     QCRIV(IJP,KB),IWB(IJM),I_DES_MODE(IJM,KBM),
+     .     INDEX_EDGE(IJE,KB,2),IEND_EDGE(IJE,2)
+c--------------------  3-d arrays -----------------------------------------C
+      Common/blk3d/
+     .     GEO_CELL(IJM,IPOLYGEN,2),INDEX_CELL(IJM,2,IPOLYGEN),     
+     .	   UF(IJM,KB),VF(IJM,KB),WF(IJM,KB),SAL(IJM,KB),
+     .     WQ(IJM,KB),T(IJM,KB),SED(IJM,KB),RMEAN(IJM,KB),WGEN(1000,KB),
+     .     WIX(IJM,IPOLYGEN),WIY(IJM,IPOLYGEN),QZ(IJM,KB),QZV(IJP,KB),
+     .     VISF(IJM,KB),CF(IJM,KB)
+C--------------------   archive   -----------------------------------------C   
+      Common/arch/
+     .     GAUGE_XY(NGAUGE,2),D_TOL(NGAUGE),INDEX_GAUGE(NGAUGE),
+     .     IHIST(IHISTM,2),ITRAC(ITRACM,2)
+c--------------------  skills  --------------------------------------------c
+      common/skill/
+     .     ESAVE(EPTSM),DZSAVE(VPTSM),CCFLUX(FPTSM,KB), 
+     .     INXE(EPTSM),INXV(VPTSM),USAVE(EPTSM,KBM),VSAVE(EPTSM,KBM),
+     .     ISFLX(FPTSM),JSFLX(FPTSM),NFLXE(FPTSM),VAAM(VPTSM,KB),
+     .     UZSAVE(VPTSM,KB),VZSAVE(VPTSM,KB),VKM(VPTSM,KB),
+     .     SZSAVE(VPTSM,KB),TZSAVE(VPTSM,KB),VKH(VPTSM,KB),
+     .     SKILLI,BETA,UDSAVE(VPTSM),VDSAVE(VPTSM),WSAVE(EPTSM,KBM)
+c-----------------------boundary value arrays------------------------------C
+      Common/ebc/
+     .     IEBC(EBCM),IABC(ABCM),IEBCINX(EBCM),IABCINX(ABCM),
+     .     AMP(ABCM,IAST),PHASE(ABCM,IAST),PERIOD(IAST),EMEAN(ABCM),
+     .     VTRAN(ABCM),FREQ(IAST),PHASE0(IAST),AMP0(IAST)
+      Common/vbc/
+     .     IVBC(VBCM),VVDIST(VBCM,KBM),IVBCINX(VBCM)
+      Common/qbc/
+     .     IQBC(QBCM),VQDIST(QBCM,KBM),IQBCINX(QBCM)
+      Common/dbc/
+     .     IDBC(DBCM),VDDIST(DBCM,KBM),IDBCINX(DBCM)
+C--------------------------------------------------------------------------C
+      Common/char1/ TOR,ADVECT,HORZMIX,VERTMIX,OPTEBC,BNFLUX,BICTRL
+      Common/char2/ DIRFLX(FPTSM),THINDAM,WAVEDYN,SEDTRAN,TFIELD,SFIELD,
+     .              WIND,WAQ,HYDTYPE,WFBC,DES,DEM,CORLIS,SGSTYPE,
+     .              POREMODULE
+C--------------------------------------------------------------------------C
+      Common/forcing/T1E,T2E,EBDRY (EBCM),DEBDRY(EBCM,2),
+     .               T1Q,T2Q,QDIS  (QBCM),DQDIS (QBCM,2),
+     .                       TDIS  (QBCM),DTDIS (QBCM,2),
+     .                       SDIS  (QBCM),DSDIS (QBCM,2),
+     .                       DQU(QBCM,2),DQV(QBCM,2),
+     .               T1D,T2D,QDIFF(DBCM),DQDIFF(DBCM,2),
+     .                       TDIFF(DBCM),DTDIFF(DBCM,2),
+     .                       SDIFF(DBCM),DSDIFF(DBCM,2),
+     .                       QU(DBCM),QV(DBCM),
+     .               T1M,T2M,QPREC       ,DQPREC(     2),
+     .                       QEVAP       ,DQEVAP(     2),
+     .                       TX          ,DTX   (     2),
+     .                       TY          ,DTY   (     2),
+     .                       HFLUX       ,DHFLUX(     2),
+     .               T1TS,T2TS,TBDRY(EBCM,KBM),DTBDRY(EBCM,KBM,2),
+     .                         SBDRY(EBCM,KBM),DSBDRY(EBCM,KBM,2),
+     .                         CBDRY(EBCM,KBM),DCBDRY(EBCM,KBM,2),
+     .               T1V,T2V,UBDRY (VBCM    ), VBDRY(VBCM      ),
+     .                       DUBDRY(VBCM,  2),DVBDRY(VBCM,    2),
+     .               T1W,T2W, WINDU2(2,IJM),WINDV2(2,IJM),
+     .               T1VISE,T2VISE,VISE(EBCM),VISEBDRY  (EBCM,2),
+     .                             TKEE(EBCM),TKEEBDRY  (EBCM,2),
+     .                           TDISSE(EBCM),TDISSEBDRY(EBCM,2),     
+     .               T1VISQ,T2VISQ,VISQ(QBCM,  KB),
+     .                         VISQBDRY(QBCM,2,KB),
+     .                             TKEQ(QBCM,  KB),TDISSQ(QBCM,KB),
+     .                         TKEQBDRY(QBCM,2,KB),
+     .                       TDISSQBDRY(QBCM,2,KB),
+     .               T1CEBC,T2CEBC, CEBC(EBCM   ),DCEBC(EBCM,   2),
+     .               T1AST, T2AST,  CAST(EBCM   ),DCAST(EBCM,   2),
+     .               T1CQBC,T2CQBC, CQBC(QBCM,KB),DCQBC(QBCM,2,KB),
+     .               T1CDBC,T2CDBC, CDBC(DBCM   ),DCDBC(DBCM,   2),
+     .               T1CVBC,T2CVBC, CVBC(VBCM,KB),DCVBC(VBCM,2,KB)
+C------   DEM MODEL  ---------------------------------------------------------------C
+      Common/demcon/
+     .     TDEM,TTTDEM,C_VIRTUAL,RHO_FLUID,RHO_PARTICLE,PMIUS,RMIUS,
+     .     PMIUSPW,RMIUSPW,PI_CON,PKN_M1PP,PKN_M1PW,EN_M1PP,EN_M1PW,
+     .     RK_M1PP,RK_M1PW,RC_M1PP,RC_M1PW,
+     .     R_ED1,R_ED2,R_ED3,R_SIGMA1,R_SIGMA2,R_SIGMA3,
+     .     DPMAX,CFKDEM,CFWDEM1,CFWDEM2,
+     .     XMINP,XMAXP,YMINP,YMAXP,ZMINP,
+     .     NNDEM,IDEM,IDEM2,ISDEM,IFLOW,N_CYLINDER,I_PTF,I_FTP,NREAD,
+     .     I_IPKPDEM,I_BCDEM,I_SOFTMODULE,I_FCOUPLING,I_ACHIVEDEM,
+     .     I_IPJPKPDEM,I_MOVE,I_TRAN,I_ROT,I_GRA,I_CV_PORE,NSH,NSV,
+     .     IIDEM,I_READ_DEMSET,IP_RANDOM,I_READ_PARTICLE_SOFT,
+     .     I_TIMESAVE
+      Common/dem1d/
+     .     XPDEM(I_PARTICLE),YPDEM(I_PARTICLE),ZPDEM(I_PARTICLE),
+     .     XQDEM(I_PARTICLE),YQDEM(I_PARTICLE),ZQDEM(I_PARTICLE),  
+     .     UPDEM(I_PARTICLE),VPDEM(I_PARTICLE),WPDEM(I_PARTICLE),
+     .     OMXDEM(I_PARTICLE),OMYDEM(I_PARTICLE),OMZDEM(I_PARTICLE),
+     .     RPDEM(I_PARTICLE),DPDEM(I_PARTICLE),PMDEM(I_PARTICLE),
+     .     RPMEAN(I_PARTICLE),PIPDEM(I_PARTICLE),
+     .     PNIUPDEM(I_PARTICLE),EPDEM(I_PARTICLE),GPDEM(I_PARTICLE),
+     .     FDXDEM(I_PARTICLE),FDYDEM(I_PARTICLE),FDZDEM(I_PARTICLE), 
+     .     FNXDEM(I_PARTICLE),FNYDEM(I_PARTICLE),FNZDEM(I_PARTICLE),
+     .     FTXDEM(I_PARTICLE),FTYDEM(I_PARTICLE),FTZDEM(I_PARTICLE),
+     .     TRXDEM(I_PARTICLE),TRYDEM(I_PARTICLE),TRZDEM(I_PARTICLE),
+     .     TPXDEM(I_PARTICLE),TPYDEM(I_PARTICLE),TPZDEM(I_PARTICLE),
+     .     F_PG_X(I_PARTICLE),F_PG_Y(I_PARTICLE),F_PG_Z(I_PARTICLE),
+     .     TKEDEM(I_PARTICLE),TDISSDEM(I_PARTICLE),
+     .     UPSUMDEM(I_PARTICLE),VPSUMDEM(I_PARTICLE),
+     .     WPSUMDEM(I_PARTICLE),UPAVEDEM(I_PARTICLE),
+     .     VPAVEDEM(I_PARTICLE),WPAVEDEM(I_PARTICLE),
+     .     UFPDEM_PRE(I_PARTICLE),VFPDEM_PRE(I_PARTICLE),
+     .     WFPDEM_PRE(I_PARTICLE),UFDEM_PRE(I_PARTICLE),
+     .     VFDEM_PRE(I_PARTICLE),WFDEM_PRE(I_PARTICLE),
+     .     FAXDEM(I_PARTICLE),FAYDEM(I_PARTICLE),FAZDEM(I_PARTICLE),
+     .     FAFXDEM(I_PARTICLE),FAFYDEM(I_PARTICLE),
+     .     FAFZDEM(I_PARTICLE),CV_PORE(I_PARTICLE),
+     .     SIGMA_P(I_PARTICLE),V_PARTICLE(I_PARTICLE),R_CYLINDER(1000), 
+     .     DELBM(N_PSLEV),DEL_HIS(I_PARTICLE), 
+     .     X_CYLINDER(1000),Y_CYLINDER(1000),Z_CYLINDER(1000),
+     .     IPP(I_PARTICLE),KPP(I_PARTICLE),NE_BCD(5),
+     .     NP_BCD(I_PARTICLE),N_P1(I_PARTICLE),N_P2(I_PARTICLE),
+     .     NSYM_CONT(I_PARTICLE),N_SYNFA(I_PARTICLE),
+     .     NBX(N_PSLEV),NBY(N_PSLEV),NBZ(N_PSLEV),I_PSLEV(I_PARTICLE),
+     .     NSYM_BC(IJM),NSYM_MOVE(I_PARTICLE),
+     .     NBCP_INDEX(N_PSLEV),IBCP_INDEX(NBL),
+     .     NBCP(NBL),IBCP(NBL1*IBCPMAX1+
+     .     NBL2*IBCPMAX2+NBL3*IBCPMAX3+NBL4*IBCPMAX4+NBL5*IBCPMAX5),
+     .     NP_HL(I_PARTICLE),NP_LL(I_PARTICLE),NPT_LL(I_PARTICLE),
+     .     IP_LL_INDEX(I_PARTICLE),IP_LL(NP_CONTACT),IBCPMAX(N_PSLEV),
+     .     IIP(I_PARTICLE),JJP(I_PARTICLE),KKP(I_PARTICLE)
+      Common/dem2d/
+     .     DEMFORCEX(IJM,KBM),DEMFORCEY(IJM,KBM),DEMFORCEZ(IJM,KBM),
+     .     STKEDEM(IJM,KBM),STDISSDEM(IJM,KBM),BF1(IJM,KBM),
+     .     DEMCOSA(IJM,6),DEMCOSB(IJM,6),DELP(IJM,KB,3),GRADP(IJM,KB,3),
+     .     BE_NORMAL(IJE,3),DELTAT_PP1X(I_PARTICLE,I_CPN),
+     .     DELTAT_PP1Y(I_PARTICLE,I_CPN),DELTAT_PP1Z(I_PARTICLE,I_CPN),
+     .     BCDEM_INFO(I_PARTICLE,21),XMV(10000,N_PSLEV),
+     .     YMV(10000,N_PSLEV),ZMV(10000,N_PSLEV),DEL_DEM(I_PARTICLE,7),
+     .     VECTOR_BE(IJE,4),CPUTDEM(1E6,8),
+     .     DEMFORCEXV(IJP,KB),DEMFORCEYV(IJP,KB),DEMFORCEZV(IJP,KB),
+     .     N_PP1(I_PARTICLE,I_CPN),N_PP2(I_PARTICLE,I_CPN),
+     .     NCONT_INFO(I_PARTICLE,7),NE_INFO(5,IJE),
+     .     INE(IJM,(NL-1)*NL*2+1),INL(IJM,NL),NCP(IJM,KBM),
+     .     IP(I_PARTICLE,N_PSLEV),JP(I_PARTICLE,N_PSLEV),
+     .     KP(I_PARTICLE,N_PSLEV),IP_HL(I_PARTICLE,10)
+      Common/dem3d/
+     .     ICP(IJM,KBM,ICPMAX)
+c     .     NBCP1(NBX1,NBY1,NBZ1),
+c     .     NBCP2(NBX2,NBY2,NBZ2),NBCP3(NBX3,NBY3,NBZ3),
+c     .     NBCP4(NBX4,NBY4,NBZ4),NBCP5(NBX5,NBY5,NBZ5)
+C      Common/dem4d/
+c     .     IBCP1(NBX1,NBY1,NBZ1,IBCPMAX),
+c     .     IBCP2(NBX2,NBY2,NBZ2,IBCPMAX),
+c     .     IBCP3(NBX3,NBY3,NBZ3,IBCPMAX),
+c     .     IBCP4(NBX4,NBY4,NBZ4,IBCPMAX),
+c     .     IBCP5(NBX5,NBY5,NBZ5,IBCPMAX)
+      Common/demChar/
+     .     ROLLMOD,ROLLBOUND,CONMOD,PSMOD,BCDMOD,DRAGMOD,CDMOD,MPTMOD,
+     .     MOD_FA,DEMRESTART
+C------   pore model  ---------------------------------------------------------------C
+      Common/poremodel/
+     .     PORE(IJM,KBM),IPPORE(IJM),KPPORE(IJM),APU(IJM,KBM),
+     .     XPPORE(IJM,KBM),YPPORE(IJM,KBM),ZPPORE(IJM,KBM),
+     .     POREV(IJP,KB),PORE_HF(IJE,KBM),PORE_VF(IJM,KB) 	  
+C------   WENO SCHEME  -------------------------------------------------------------C
+      Common/WENOCOE/
+     .     ALF_PLUX(KB,3,3),ALF_MINU(KB,3,3),C_PLUX(3),C_MINU(3),
+     .     A_ENO(IJM,4,0:30),I_STENCIL(IJM,30),QGHOST(-10000:-1,KB),
+     .     INDEX_GHOST(-10000:-1),GHOSTP(-10000:-1,2),
+     .     IWENO(IJM),L_DEGREE(IJM),NUM_STENCIL(IJM)
+C------   Consistent BC  -----------------------------------------------------C
+      Common/BCtop/
+     .     U_TOP(IJM,3),V_TOP(IJM,3),W_TOP(IJM,3),TKE_TOP(IJM,3),
+     .     TDISS_TOP(IJM,3),DIVTKEZ_TOP(IJM,KB),DIVTDISSZ_TOP(IJM,KB),
+     .     DIVUZ_TOP(IJM,KB),DIVVZ_TOP(IJM,KB),DIVWZ_TOP(IJM,KB),
+     .     KM_TOP(IJM,KB),RKM_TOP(IJM),RRF1(IJM,KB),RRF1V(IJP,KB),
+     .     RRF2(IJM,KB),RRF2V(IJP,KB),RRF3(IJM,KB),RRF3V(IJP,KB)	     
+C------   STATISTICS  --------------------------------------------------------------C
+	  Common/statistic/
+     .     UTRV(IJP,KB), AVEURV(IJP,KB), AVEVRV(IJP,KB),
+     .     AVEWRV(IJP,KB), AVEUTRV(IJP,KB), AVEUURV(IJP,KB),
+     .     AVEUVRV(IJP,KB), AVEUWRV(IJP,KB), AVEVVRV(IJP,KB),
+     .     AVEVWRV(IJP,KB), AVEWWRV(IJP,KB), RYNUU(IJP,KB),
+     .     RYNUV(IJP,KB), RYNUW(IJP,KB), RYNVV(IJP,KB),
+     .     RYNVW(IJP,KB), RYNWW(IJP,KB), NSTART
+     .     IAVENUM,IAVEDAT,IAVESTA,IAVERES,NSTEPAVE
+C------ concentration ----------------------------------------------------C
+      Common/concentration/ 
+     .     X_C(NUM_C),Y_C(NUM_C),CQBCM(NUM_C,KBM),INDEX_C(NUM_C)
+C------ improved SST k-w----------------------------------------------------C
+      Common/improved_SST/ 
+     .     RW_SST(IJM,KBM),F5_SST(IJM,KBM)
+C------ Immersed boundary method ------------------------------------------C
+	  Common/setvalue/
+     .     RITP,RIFL,NUMIB,INFCELL,IBSTEP,IBMSCHEME,
+     .     IBMSHAPE,IBMDOMAIN,IBGCMODE,IBFSCHEME,IBGCSCHEME,
+     .     IBMB,IBMF,IBMS,IBMGC,IBMGCI,IBMP,IBMN,IBMT,IBMDIB,
+     .     IBMDF,IBMSET,IBMSP,IBM2D,IBM3D,IBMCP,IBMCDCL,IBMDATA
+      Common/ibmvalue/
+     .     BFX(IJM,KBM),BFY(IJM,KBM),BFZ(IJM,KBM),BXY(5,IJM,3),
+     .	   PGC(10000,8),IDC(IJM,KBM),IDP(IJP,KB),IGC(10000,2),
+     .     NGC(10000,30,2),ISC(50000,2),NBR(IJM,30),
+     .	   IBN(5),NUMSL,NUMGH
+	  Common/ibmsave/
+     .     SAU(IJP,KB),SAV(IJP,KB),SAW(IJP,KB),SAP(IJP,KB),
+     .     SAP2(IJM,KBM),SAE(IJP),SAE2(IJM)
