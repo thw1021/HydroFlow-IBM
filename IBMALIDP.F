@@ -14,7 +14,7 @@ C############################################################################
       
       Include './Include/OCERM_INF'
       
-      Real(kind=8) BXY2(10000,KB,3),BXY3(10000,3,3),ZPH(IJP,KB),CRP(3)
+      Real(kind=8) BXY2(10000,KB,3),BXY3(10000,3,3),CRP(3)
       Double precision XMAX,XMIN,YMAX,YMIN,ZMAX,ZMIN,FL,FR,ZIB,Z2D,GK
       Integer nn,nc,NTC,S1,S2,S3
       
@@ -28,7 +28,7 @@ C===========================================================================C
       Do K = 1,KB
       Do I = 1,IJP
           IDP(I,K) = 0
-          ZPH(I,K) = Z(K)*(HP(I)+ELFV(I))+ELFV(I)
+          ZRP(I,K) = Z(K)*(HP(I)+ELFV(I))+ELFV(I)
       Enddo
       Enddo
 
@@ -87,7 +87,7 @@ C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++C
       Do 201 K = 1,KB     
       Do I = 1,IJP        
           
-      If (ZPH(I,K).LE.Z2D) Then
+      If (ZRP(I,K).LE.Z2D) Then
           
 C***************************************************************************C
 C             Ray-casting Method Begins                                     C
@@ -289,7 +289,7 @@ C             Ray-casting Method Begins                                     C
 C***************************************************************************C            
       If ((PXY(I,1).LE.XMAX).AND.(PXY(I,1).GE.XMIN).AND. 
      &    (PXY(I,2).LE.YMAX).AND.(PXY(I,2).GE.YMIN).AND.
-     &    (ZPH(I,K).LE.ZMAX).AND.(ZPH(I,K).GE.ZMIN)) Then 
+     &    (ZRP(I,K).LE.ZMAX).AND.(ZRP(I,K).GE.ZMIN)) Then 
      
       S1 = 0
       Do 302 nc = 1,NTC
@@ -327,9 +327,9 @@ C***************************************************************************C
      &        (BXY3(nc,3,1)-BXY3(nc,1,1))))
           ZIB = FR/FL+BXY3(nc,1,3)
           
-          If (ZPH(I,K).LT.ZIB) Then
+          If (ZRP(I,K).LT.ZIB) Then
               S1 = S1 + 1
-          Else If (ZPH(I,K).EQ.ZIB) Then
+          Else If (ZRP(I,K).EQ.ZIB) Then
               S1 = 1
               Exit
           Endif

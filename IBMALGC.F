@@ -16,8 +16,10 @@ C############################################################################
       
       Real(kind=8) BFU(IJM,KBM),BFV(IJM,KBM),BFW(IJM,KBM)
       Real(kind=8) BFP(IJM,KBM),BFE(IJM)
-      Double precision UTEMP,VTEMP,WTEMP,PTEMP,ETEMP,YTEMP,ETAK,WM
-      Double precision RM,DK,UCOS,USIN,UFR,UPT,UGT,UGN,UPL,YPL,REST
+      Double precision UTEMP,VTEMP,WTEMP,PTEMP,ETEMP,YTEMP
+      Double precision UTEMP2,VTEMP2,WTEMP2,PTEMP2,ETEMP2,YTEMP2
+      Double precision ETAK,WM,DK,ZALPHA
+      Double precision UCOS,USIN,UFR,UPT,UGT,UGN,UPL,YPL,REST
       Integer near_points,NUM
 
       
@@ -35,6 +37,12 @@ C===========================================================================C
               BFY(I,K) = 0
               BFZ(I,K) = 0
           Enddo
+      Enddo
+      
+      Do K = 1,KBM
+      Do I = 1,IJM
+          ZRC(I,K) = ZZ(K)*(HC(I)+ELF(I))+ELF(I)
+      Enddo
       Enddo
               
 C===========================================================================C      
@@ -68,19 +76,20 @@ C===========================================================================C
       If (NSTEP.EQ.ISTART) Then
           Write(*,*) 'GCMODE is linear weight interpolation.'
       Endif
+      
+      If (IBMDOMAIN.EQ.2) Then
 C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++C
       
       near_points = 28
 
       Do N = 1,NUMGH
+      If (IDC(IGC(N,1),IGC(N,2)).EQ.2) Then  
           ETAK = 0
-              
-c          DK = (PGC(N,1) - BXY(1,PGC(N,4),1)) ** 2
-c     &        +(PGC(N,2) - BXY(1,PGC(N,4),2)) ** 2
           Do J = 1,near_points
-          If (IDC(NGC(N,J,1),NGC(N,J,2)).LT.0.9) Then
-              DK = (PGC(N,1) - CXY(NGC(N,J,1),1)) ** 2
-     &            +(PGC(N,2) - CXY(NGC(N,J,1),2)) ** 2
+          I = NBR(IGC(N,1),J)
+          K = PGC(N,4)
+          If (IDC(I,K).LT.0.9) Then
+              DK = (PGC(N,1)-CXY(I,1))**2 + (PGC(N,2)-CXY(I,2))**2
               If (DK.LE.RITP**2) Then
                   If (DK.GT.1.0E-10) Then
                       ETAK = ETAK + 1/DK
@@ -99,38 +108,151 @@ c     &        +(PGC(N,2) - BXY(1,PGC(N,4),2)) ** 2
           ETEMP = 0
           
           Do J = 1,near_points
-          If (IDC(NGC(N,J,1),NGC(N,J,2)).LT.0.9) Then
-              DK = (PGC(N,1) - CXY(NGC(N,J,1),1)) ** 2
-     &            +(PGC(N,2) - CXY(NGC(N,J,1),2)) ** 2
+          I = NBR(IGC(N,1),J)
+          K = PGC(N,4)
+          If (IDC(I,K).LT.0.9) Then
+              DK = (PGC(N,1)-CXY(I,1))**2 + (PGC(N,2)-CXY(I,2))**2
               If (DK.LE.RITP**2) Then
                   If (DK.GT.1.0E-10) Then
                       WM = (1/ETAK) * (1/DK)
                   Else
                       WM = 0
                   Endif
-                  UTEMP = UTEMP + WM * U(NGC(N,J,1),NGC(N,J,2))
-                  VTEMP = VTEMP + WM * V(NGC(N,J,1),NGC(N,J,2))
-                  WTEMP = WTEMP + WM * W(NGC(N,J,1),NGC(N,J,2))
-                  ETEMP = ETEMP + WM * ELF(NGC(N,J,1))
-                  PTEMP = PTEMP + WM * PN(NGC(N,J,1),NGC(N,J,2))
+                  UTEMP = UTEMP + WM * U(I,K)
+                  VTEMP = VTEMP + WM * V(I,K)
+                  WTEMP = WTEMP + WM * W(I,K)
+                  ETEMP = ETEMP + WM * ELF(I)
+                  PTEMP = PTEMP + WM * PN(I,K)
               Endif
           Endif
           Enddo
-              
-          If (IBGCMODE.EQ.0) Then
-              BFU(IGC(N,1),IGC(N,2)) = -UTEMP
-              BFV(IGC(N,1),IGC(N,2)) = -VTEMP
-              BFW(IGC(N,1),IGC(N,2)) = -WTEMP
-          Else if (IBGCMODE.EQ.1) Then
-              BFU(IGC(N,1),IGC(N,2)) = 0.5 * UTEMP
-              BFV(IGC(N,1),IGC(N,2)) = 0.5 * VTEMP
-              BFW(IGC(N,1),IGC(N,2)) = 0.5 * WTEMP
-          Endif
+          
+          BFU(IGC(N,1),IGC(N,2)) = 0.5 * UTEMP
+          BFV(IGC(N,1),IGC(N,2)) = 0.5 * VTEMP
+          BFW(IGC(N,1),IGC(N,2)) = 0.5 * WTEMP
           BFE(IGC(N,1)) = ETEMP
           BFP(IGC(N,1),IGC(N,2)) = PTEMP
+      Else if (IDC(IGC(N,1),IGC(N,2)).GE.3) Then
+          ZALPHA = 1 - Abs(PGC(N,3)-ZRC(IGC(N,1),IGC(N,2))) / PGC(N,7)
+          
+          BFU(IGC(N,1),IGC(N,2)) = ZALPHA * U(I,K)
+          BFV(IGC(N,1),IGC(N,2)) = ZALPHA * V(I,K)
+          BFW(IGC(N,1),IGC(N,2)) = ZALPHA * W(I,K)
+          BFE(IGC(N,1)) = ELF(I)
+          BFP(IGC(N,1),IGC(N,2)) = PN(I,K)
+      Endif
       Enddo
       
 C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++C
+      Endif
+      
+      If (IBMDOMAIN.EQ.3) Then
+C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++C
+      near_points = 28
+
+      Do N = 1,NUMGH
+! Step1: K layer distance weight interpolation
+          ETAK = 0
+          Do J = 1,near_points
+          I = NBR(IGC(N,1),J)
+          K = PGC(N,4)
+          If (IDC(I,K).LT.0.9) Then
+              DK = (PGC(N,1)-CXY(I,1))**2 + (PGC(N,2)-CXY(I,2))**2
+              If (DK.LE.RITP**2) Then
+                  If (DK.GT.1.0E-10) Then
+                      ETAK = ETAK + 1/DK
+                  Else
+                      ETAK = ETAK + 0
+                  Endif
+              Endif
+          Endif
+          Enddo
+          
+          WM = 0
+          UTEMP = 0
+          VTEMP = 0
+          WTEMP = 0
+          PTEMP = 0
+          ETEMP = 0
+          
+          Do J = 1,near_points
+          I = NBR(IGC(N,1),J)
+          K = PGC(N,4)
+          If (IDC(I,K).LT.0.9) Then
+              DK = (PGC(N,1)-CXY(I,1))**2 + (PGC(N,2)-CXY(I,2))**2
+              If (DK.LE.RITP**2) Then
+                  If (DK.GT.1.0E-10) Then
+                      WM = (1/ETAK) * (1/DK)
+                  Else
+                      WM = 0
+                  Endif
+                  UTEMP = UTEMP + WM * U(I,K)
+                  VTEMP = VTEMP + WM * V(I,K)
+                  WTEMP = WTEMP + WM * W(I,K)
+                  ETEMP = ETEMP + WM * ELF(I)
+                  PTEMP = PTEMP + WM * PN(I,K)
+              Endif
+          Endif
+          Enddo
+          
+! Step2: K-1 layer distance weight interpolation          
+          ETAK = 0
+          Do J = 1,near_points
+          I = NBR(IGC(N,1),J)
+          K = PGC(N,4) - 1
+          If (IDC(I,K).LT.0.9) Then
+              DK = (PGC(N,1)-CXY(I,1))**2 + (PGC(N,2)-CXY(I,2))**2
+              If (DK.LE.RITP**2) Then
+                  If (DK.GT.1.0E-10) Then
+                      ETAK = ETAK + 1/DK
+                  Else
+                      ETAK = ETAK + 0
+                  Endif
+              Endif
+          Endif
+          Enddo
+          
+          WM = 0
+          UTEMP2 = 0
+          VTEMP2 = 0
+          WTEMP2 = 0
+          PTEMP2 = 0
+          ETEMP2 = 0
+          
+          Do J = 1,near_points
+          I = NBR(IGC(N,1),J)
+          K = PGC(N,4) - 1
+          If (IDC(I,K).LT.0.9) Then
+              DK = (PGC(N,1)-CXY(I,1))**2 + (PGC(N,2)-CXY(I,2))**2
+              If (DK.LE.RITP**2) Then
+                  If (DK.GT.1.0E-10) Then
+                      WM = (1/ETAK) * (1/DK)
+                  Else
+                      WM = 0
+                  Endif
+                  UTEMP2 = UTEMP2 + WM * U(I,K)
+                  VTEMP2 = VTEMP2 + WM * V(I,K)
+                  WTEMP2 = WTEMP2 + WM * W(I,K)
+                  PTEMP2 = PTEMP2 + WM * PN(I,K)
+              Endif
+          Endif
+          Enddo
+          
+! Step3: K & K-1 layer linear interpolation  
+          I = IGC(N,1)
+          K = PGC(N,4)
+          ZALPHA = Abs(ZRC(I,K-1)-PGC(N,3)) / Abs(ZRC(I,K-1)-ZRC(I,K)) 
+                 
+          BFU(IGC(N,1),IGC(N,2)) = ZALPHA * UTEMP + (1-ZALPHA) * UTEMP2
+          BFV(IGC(N,1),IGC(N,2)) = ZALPHA * VTEMP + (1-ZALPHA) * VTEMP2
+          BFW(IGC(N,1),IGC(N,2)) = ZALPHA * WTEMP + (1-ZALPHA) * WTEMP2
+          BFE(IGC(N,1)) = ETEMP
+          BFP(IGC(N,1),IGC(N,2)) = ZALPHA * PTEMP + (1-ZALPHA) * PTEMP2
+      Enddo
+      
+C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++C
+      Endif
+
       Endif
 
 C===========================================================================C
@@ -141,112 +263,266 @@ C===========================================================================C
       If (NSTEP.EQ.ISTART) Then
           Write(*,*) 'GCMODE is wall function interpolation.'
       Endif
+      
+      If (IBMDOMAIN.EQ.2) Then
 C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++C 
       
       near_points = 28
 
       Do N = 1,NUMGH
+      If (IDC(IGC(N,1),IGC(N,2)).EQ.2) Then 
           ETAK = 0
-          
           Do J = 1,near_points
-              If (IDC(NGC(N,J,1),NGC(N,J,2)).LT.0.9) Then
-                  DK = (PGC(N,1) - CXY(NGC(N,J,1),1)) ** 2
-     &                +(PGC(N,2) - CXY(NGC(N,J,1),2)) ** 2
-                  If (DK.LE.RITP**2) Then
-                      If (DK.GT.1.0E-8) Then
-                          ETAK = ETAK + 1/DK
-                      Else
-                          ETAK = ETAK + 0
-                      Endif
+          I = NBR(IGC(N,1),J)
+          K = PGC(N,4)
+          If (IDC(I,K).LT.0.9) Then
+              DK = (PGC(N,1)-CXY(I,1))**2 + (PGC(N,2)-CXY(I,2))**2
+              If (DK.LE.RITP**2) Then
+                  If (DK.GT.1.0E-10) Then
+                      ETAK = ETAK + 1/DK
+                  Else
+                      ETAK = ETAK + 0
                   Endif
               Endif
+          Endif
           Enddo
           
           WM = 0
           UTEMP = 0
           VTEMP = 0
           WTEMP = 0
-          UGN = 0
-          UGT = 0
+          PTEMP = 0
+          ETEMP = 0
           
           Do J = 1,near_points
-          If (IDC(NGC(N,J,1),NGC(N,J,2)).LT.0.9) Then
-              DK = (PGC(N,1) - CXY(NGC(N,J,1),1)) ** 2
-     &            +(PGC(N,2) - CXY(NGC(N,J,1),2)) ** 2
-              If (DK.LE.RITP**2) Then 
+          I = NBR(IGC(N,1),J)
+          K = PGC(N,4)
+          If (IDC(I,K).LT.0.9) Then
+              DK = (PGC(N,1)-CXY(I,1))**2 + (PGC(N,2)-CXY(I,2))**2
+              If (DK.LE.RITP**2) Then
                   If (DK.GT.1.0E-10) Then
                       WM = (1/ETAK) * (1/DK)
                   Else
                       WM = 0
                   Endif
-                  UTEMP = UTEMP + WM * U(NGC(N,J,1),NGC(N,J,2))
-                  VTEMP = VTEMP + WM * V(NGC(N,J,1),NGC(N,J,2))
-                  WTEMP = WTEMP + WM * QZ(NGC(N,J,1),NGC(N,J,2))
-              If (NSTEP.EQ.ISTART) Then
-              Write(IBMP,1000) CXY(NGC(N,J,1),1),CXY(NGC(N,J,1),2),
-     &                         ZZ(NGC(N,J,2))                  
+                  UTEMP = UTEMP + WM * U(I,K)
+                  VTEMP = VTEMP + WM * V(I,K)
+                  WTEMP = WTEMP + WM * W(I,K)
+                  ETEMP = ETEMP + WM * ELF(I)
+                  PTEMP = PTEMP + WM * PN(I,K)
               Endif
+          Endif
+          Enddo
+      Else if (IDC(IGC(N,1),IGC(N,2)).GE.3) Then
+          ZALPHA = 1 - Abs(PGC(N,3)-ZRC(IGC(N,1),IGC(N,2))) / PGC(N,7)
+          
+          UTEMP = ZALPHA * U(I,K)
+          VTEMP = ZALPHA * V(I,K)
+          WTEMP = ZALPHA * W(I,K)
+          ETEMP = ELF(I)
+          PTEMP = PN(I,K)
+      Endif
+          
+      UPT = UTEMP * PGC(N,9) - VTEMP * PGC(N,8)
+          
+      NUM = 0
+      REST = 100
+      YPL = 20
+      Do while (REST.GT.1E-10) 
+          YTEMP = YPL
+          YPL = (YPL + 0.4*PGC(N,7)*Abs(UPT)/UMOL)/(1+log(9.8*YPL))
+          REST = Abs(YPL - YTEMP) 
+          NUM = NUM + 1
+          If (NUM.GT.1000) REST = 0
+      End do
+          
+      UFR = YPL * UMOL / PGC(N,7)
+      UPL = 2.5 * log(9.8*0.5*PGC(N,7)*UFR / UMOL)
+          
+      If (UPT.GE.0) Then 
+          UGT = UPL * UFR
+      Else
+          UGT = -1 * UPL * UFR
+      Endif
+          
+      UGN = 0
+      TKE(IGC(N,1),IGC(N,2)) = UFR**2/0.3
+      TDISS(IGC(N,1),IGC(N,2)) = Sqrt((0.00008/(PGC(N,7)**2))**2+
+     &            (Sqrt(TKE(IGC(N,1),IGC(N,2)))/(0.219*PGC(N,7)))**2)
+
+c     UGT = 0.5 * (UTEMP * PGC(N,8) - VTEMP * PGC(N,7)) 
+c     UGN = 0.5 * (UTEMP * PGC(N,7) + VTEMP * PGC(N,8))    
+
+      BFU(IGC(N,1),IGC(N,2)) = UGN * PGC(N,8) + UGT * PGC(N,9)
+      BFV(IGC(N,1),IGC(N,2)) = UGN * PGC(N,9) - UGT * PGC(N,8)
+      BFW(IGC(N,1),IGC(N,2)) = 0.5 * WTEMP
+      BFE(IGC(N,1)) = ETEMP
+      BFP(IGC(N,1),IGC(N,2)) = PTEMP
+
+      If (NSTEP.EQ.IEND) Then
+          If (UGN.LT.0) Then
+              UCOS = -1 * PGC(N,8)
+              USIN = -1 * PGC(N,9)
+          Else
+              UCOS = PGC(N,8)
+              USIN = PGC(N,9)
+          Endif
+          Write(IBMN,1100) CXY(IGC(N,1),1),CXY(IGC(N,1),2),UCOS,USIN
+                      
+          If (UGT.LT.0) Then
+              UCOS = PGC(N,8)
+              USIN = -1 * PGC(N,9)
+          Else
+              UCOS = -1 * PGC(N,8)
+              USIN = PGC(N,9)
+          Endif
+          Write(IBMT,1100) CXY(IGC(N,1),1),CXY(IGC(N,1),2),USIN,UCOS
+      Endif
+      Enddo
+      
+C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++C
+      Endif
+      
+      If (IBMDOMAIN.EQ.3) Then
+C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++C
+      near_points = 28
+
+      Do N = 1,NUMGH
+! Step1: K layer distance weight interpolation
+          ETAK = 0
+          Do J = 1,near_points
+          I = NBR(IGC(N,1),J)
+          K = PGC(N,4)
+          If (IDC(I,K).LT.0.9) Then
+              DK = (PGC(N,1)-CXY(I,1))**2 + (PGC(N,2)-CXY(I,2))**2
+              If (DK.LE.RITP**2) Then
+                  If (DK.GT.1.0E-10) Then
+                      ETAK = ETAK + 1/DK
+                  Else
+                      ETAK = ETAK + 0
+                  Endif
               Endif
           Endif
           Enddo
           
+          WM = 0
+          UTEMP = 0
+          VTEMP = 0
+          WTEMP = 0
+          PTEMP = 0
+          ETEMP = 0
           
-          UPT = UTEMP * PGC(N,8) - VTEMP * PGC(N,7)
+          Do J = 1,near_points
+          I = NBR(IGC(N,1),J)
+          K = PGC(N,4)
+          If (IDC(I,K).LT.0.9) Then
+              DK = (PGC(N,1)-CXY(I,1))**2 + (PGC(N,2)-CXY(I,2))**2
+              If (DK.LE.RITP**2) Then
+                  If (DK.GT.1.0E-10) Then
+                      WM = (1/ETAK) * (1/DK)
+                  Else
+                      WM = 0
+                  Endif
+                  UTEMP = UTEMP + WM * U(I,K)
+                  VTEMP = VTEMP + WM * V(I,K)
+                  WTEMP = WTEMP + WM * W(I,K)
+                  ETEMP = ETEMP + WM * ELF(I)
+                  PTEMP = PTEMP + WM * PN(I,K)
+              Endif
+          Endif
+          Enddo
+          
+! Step2: K-1 layer distance weight interpolation          
+          ETAK = 0
+          Do J = 1,near_points
+          I = NBR(IGC(N,1),J)
+          K = PGC(N,4) - 1
+          If (IDC(I,K).LT.0.9) Then
+              DK = (PGC(N,1)-CXY(I,1))**2 + (PGC(N,2)-CXY(I,2))**2
+              If (DK.LE.RITP**2) Then
+                  If (DK.GT.1.0E-10) Then
+                      ETAK = ETAK + 1/DK
+                  Else
+                      ETAK = ETAK + 0
+                  Endif
+              Endif
+          Endif
+          Enddo
+          
+          WM = 0
+          UTEMP2 = 0
+          VTEMP2 = 0
+          WTEMP2 = 0
+          PTEMP2 = 0
+          ETEMP2 = 0
+          
+          Do J = 1,near_points
+          I = NBR(IGC(N,1),J)
+          K = PGC(N,4) - 1
+          If (IDC(I,K).LT.0.9) Then
+              DK = (PGC(N,1)-CXY(I,1))**2 + (PGC(N,2)-CXY(I,2))**2
+              If (DK.LE.RITP**2) Then
+                  If (DK.GT.1.0E-10) Then
+                      WM = (1/ETAK) * (1/DK)
+                  Else
+                      WM = 0
+                  Endif
+                  UTEMP2 = UTEMP2 + WM * U(I,K)
+                  VTEMP2 = VTEMP2 + WM * V(I,K)
+                  WTEMP2 = WTEMP2 + WM * W(I,K)
+                  PTEMP2 = PTEMP2 + WM * PN(I,K)
+              Endif
+          Endif
+          Enddo
+          
+! Step3: K & K-1 layer linear interpolation  
+          I = IGC(N,1)
+          K = PGC(N,4)
+          ZALPHA = Abs(ZRC(I,K-1)-PGC(N,3)) / Abs(ZRC(I,K-1)-ZRC(I,K)) 
+                 
+          UTEMP = ZALPHA * UTEMP + (1-ZALPHA) * UTEMP2
+          VTEMP = ZALPHA * VTEMP + (1-ZALPHA) * VTEMP2
+          WTEMP = ZALPHA * WTEMP + (1-ZALPHA) * WTEMP2
+          
+          UPT = UTEMP * PGC(N,9) - VTEMP * PGC(N,8)
           
           NUM = 0
-	    REST = 100
-	    YPL = 20
-	  
-	    Do while (REST.GT.1E-10) 
+          REST = 100
+          YPL = 20
+          Do while (REST.GT.1E-10) 
               YTEMP = YPL
-		    YPL = (YPL + 0.4*PGC(N,6)*Abs(UPT)/UMOL)/(1+log(9.8*YPL))
-		    REST = Abs(YPL - YTEMP) 
-		    NUM = NUM + 1
-		    If (NUM.GT.1000) REST = 0
+              YPL = (YPL + 0.4*PGC(N,7)*Abs(UPT)/UMOL)/(1+log(9.8*YPL))
+              REST = Abs(YPL - YTEMP) 
+              NUM = NUM + 1
+              If (NUM.GT.1000) REST = 0
           End do
           
-	    UFR = YPL * UMOL / PGC(N,6)
-	    UPL = 2.5 * log(9.8*0.5*PGC(N,6)*UFR / UMOL)
+          UFR = YPL * UMOL / PGC(N,7)
+          UPL = 2.5 * log(9.8*0.5*PGC(N,7)*UFR / UMOL)
           
           If (UPT.GE.0) Then 
-	        UGT = UPL * UFR
+              UGT = UPL * UFR
           Else
               UGT = -1 * UPL * UFR
           Endif
           
-	    UGN = 0
-	    TKE(IGC(N,1),IGC(N,2)) = UFR**2/0.3
-	    TDISS(IGC(N,1),IGC(N,2)) = Sqrt((0.00008/(PGC(N,6)**2))**2+
-     &            (Sqrt(TKE(IGC(N,1),IGC(N,2)))/(0.219*PGC(N,6)))**2)
+          UGN = 0
+          TKE(IGC(N,1),IGC(N,2)) = UFR**2/0.3
+          TDISS(IGC(N,1),IGC(N,2)) = Sqrt((0.00008/(PGC(N,7)**2))**2+
+     &            (Sqrt(TKE(IGC(N,1),IGC(N,2)))/(0.219*PGC(N,7)))**2)
 
-c          UGT = 0.5 * (UTEMP * PGC(N,8) - VTEMP * PGC(N,7)) 
-c          UGN = 0.5 * (UTEMP * PGC(N,7) + VTEMP * PGC(N,8))    
+c         UGT = 0.5 * (UTEMP * PGC(N,8) - VTEMP * PGC(N,7)) 
+c         UGN = 0.5 * (UTEMP * PGC(N,7) + VTEMP * PGC(N,8))    
 
-          BFU(IGC(N,1),IGC(N,2)) = UGN * PGC(N,7) + UGT * PGC(N,8)
-          BFV(IGC(N,1),IGC(N,2)) = UGN * PGC(N,8) - UGT * PGC(N,7)
-
-          If (NSTEP.EQ.20000) Then
-              If (UGN.LT.0) Then
-                  UCOS = -1 * PGC(N,7)
-                  USIN = -1 * PGC(N,8)
-              Else
-                  UCOS = PGC(N,7)
-                  USIN = PGC(N,8)
-              Endif
-              Write(IBMN,1100) CXY(IGC(N,1),1),CXY(IGC(N,1),2),UCOS,USIN
-                      
-              If (UGT.LT.0) Then
-                  UCOS = PGC(N,7)
-                  USIN = -1 * PGC(N,8)
-              Else
-                  UCOS = -1 * PGC(N,7)
-                  USIN = PGC(N,8)
-              Endif
-              Write(IBMT,1100) CXY(IGC(N,1),1),CXY(IGC(N,1),2),USIN,UCOS
-          Endif
+          BFU(IGC(N,1),IGC(N,2)) = UGN * PGC(N,8) + UGT * PGC(N,9)
+          BFV(IGC(N,1),IGC(N,2)) = UGN * PGC(N,9) - UGT * PGC(N,8)
+          BFW(IGC(N,1),IGC(N,2)) = 0.5 * WTEMP
+          BFE(IGC(N,1)) = ETEMP
+          BFP(IGC(N,1),IGC(N,2)) = ZALPHA * PTEMP + (1-ZALPHA) * PTEMP2
       Enddo
-      
 C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++C
+      Endif
+      
       Endif
       
 C===========================================================================C      
@@ -270,16 +546,24 @@ C===========================================================================C
               V(I,K) = BFV(I,K)
               QZ(I,K) = 0
               W(I,K) = 0
-              ELF(I) = BFE(I)
-              PN(I,K) = BFP(I,K)
               If(IDC(I,K).EQ.1) Then
                   TKE(I,K) = 0
                   TDISS(I,K) = 100000
-                  ELF(I) = 0
               Endif  
           Endif
       Enddo
       Enddo
+      
+      If (IBGCMODE.EQ.1) Then
+          Do K = 1, KBM
+          Do I = 1, IJM
+              If (IDC(I,K).GT.0.9) Then
+                  ELF(I) = BFE(I)
+                  PN(I,K) = BFP(I,K)  
+              Endif
+          Enddo
+          Enddo
+      Endif
 
 1000  Format (3F8.4)
 1100  Format (4F10.6)

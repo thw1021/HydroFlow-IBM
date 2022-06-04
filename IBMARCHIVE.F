@@ -94,15 +94,17 @@ C===========================================================================C
           Cp3 = 0
           Do K = 1,KBM
           Do I = 1,IJM
-          If (IDC(I,K).GT.1.9) Then
+          If (IDC(I,K).EQ.2) Then
               ELFREF = ELF(INFCELL)
               UREF = U(INFCELL,K) / (HC(INFCELL) + ELFREF)
               PNREF = PN(INFCELL,K)
-              Cp1 = (ELF(I) - ELFREF) * 2 * GRAV / (UREF**2)
-              Cp2 = (PN(I,K) - PNREF) / (500 * UREF**2)
-              Cp3 = Cp1 + Cp2
-              Write(IBMCP,'(7F16.8)') CXY(I,1), CXY(I,2), ZZ(k),
-     &                                Cp1, Cp2, Cp3, ELFREF
+c              Cp1 = (ELF(I) - ELFREF) * 2 * GRAV / (UREF**2)
+c              Cp2 = (PN(I,K) - PNREF) / (500 * UREF**2)
+c              Cp3 = Cp1 + Cp2
+              Cp1 = SAE2(I)
+              Cp2 = SAP2(I,K)
+              Write(IBMCP,'(5F16.8)') CXY(I,1), CXY(I,2), ZZ(k),
+     &                                Cp1, Cp2
           Endif
           Enddo
           Enddo

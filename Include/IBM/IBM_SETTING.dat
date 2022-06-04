@@ -3,8 +3,8 @@
 --------------------------------------------------------------------------	 
        IBMSCHEME       IBMDOMAIN        NUMBERIB 
                0               2               1
-       IBFSCHEME        IBGCMODE      IBGCSCHEME 
-               1               1               1       
+       IBFSCHEME       IBGCSCHEME       IBGCMODE      
+               1               1               0       
             RITP            RIFL         INFCELL
             0.15       0.0050265               1   
 	   
@@ -16,8 +16,8 @@ IBMDOMAIN: Demension of discrete boundary field (2-2D layer boundary; 3-3D bound
 NUMBERIB: Number of boudary
 
 IBFSCHEME: Scheme of force term (1-Ghost cell; 2-Direct force) 
-IBGCMODE：Interpolation mode of Ghost cells (0-In boundary;1-Out boundary)
 IBGCSCHEME: Scheme of interpolation in GCIBM (0-Assignment; 1-Linear weight; 2-Wall function)
+IBGCMODE：Boundary condition mode of Ghost cells (0-Without pressure bc;1-With pressure bc)
 
 RITP: Parameter of influential domain with girdsize
 RIFL: weight of each direct force point

@@ -15,10 +15,11 @@ C############################################################################
       Include './Include/OCERM_INF'
       
       Real(kind=8) BXY2(10000,KB,3),BXY3(10000,3,3)
-      Real(kind=8) ZPH(IJM,KBM),PLANE(3,3),LINE(2,2),CRP(3)
+      Real(kind=8) PLANE(3,3),LINE(2,2),CRP(3)
       Double precision XMAX,XMIN,YMAX,YMIN,ZMAX,ZMIN,FL,FR,GK,ZIB,Z2D
-      Double precision LA,LB,LC,LDIS,LDMIN,XIM,YIM,ZIM
+      Double precision LA,LB,LC,LDIS,LDMIN,XIM,YIM,ZIM,ZNE
       Double precision PA,PB,PC,PD,PDIS,PDMIN,PNDMIN,KDMIN,TLINE
+      Double precision IPX,IPY,IPZ,IPK,IPDIS,IPCOS,IPSIN
       Integer nn,nc,NNB,NTC,S1,N_C,N_SL,N_GH,NBMIN,NPMIN,KMIN
       Logical is_coincide
       
@@ -29,28 +30,24 @@ C===========================================================================C
 
       NUMSL = 0
       NUMGH = 0
-      Z2D = 100
+      Z2D = -1
       
       Do K = 1,KBM
       Do I = 1,IJM
           IDC(I,K) = 0
-          ZPH(I,K) = ZZ(K)*(HC(I)+ELF(I))+ELF(I)
+          ZRC(I,K) = ZZ(K)*(HC(I)+ELF(I))+ELF(I)
       Enddo
       Enddo 
       
-      Do N = 1,10000
+      Do N = 1,IJM
           IGC(N,1) = 0
           IGC(N,2) = 0
-          Do J = 1,8
+          Do J = 1,9
               PGC(N,J) = 0
-          Enddo
-          Do J = 1,30
-              NGC(N,J,1) = 0
-              NGC(N,J,2) = 0
           Enddo
       Enddo  
       
-      Do N = 1,50000
+      Do N = 1,IJM*2
           ISC(N,1) = 0
           ISC(N,2) = 0
       Enddo
@@ -63,7 +60,7 @@ C===========================================================================C
 C         2D Immersed boundary detection      
 C===========================================================================C   
       
-      If(IBMDOMAIN.EQ.2)Then 
+      If (IBMDOMAIN.EQ.2) Then 
           
       Do 200 nn = 1,NUMIB
         
@@ -110,7 +107,7 @@ C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++C
       Do 201 K = 1,KBM    
       Do I = 1,IJM    
           
-      If (ZPH(I,K).LE.Z2D) Then
+      If (ZRC(I,K).LE.Z2D) Then
           
 C***************************************************************************C
 C             Ray-casting Method Begins                                     C
@@ -311,7 +308,7 @@ C             Ray-casting Method Begins                                     C
 C***************************************************************************C            
       If ((CXY(I,1).LE.XMAX).AND.(CXY(I,1).GE.XMIN).AND. 
      &    (CXY(I,2).LE.YMAX).AND.(CXY(I,2).GE.YMIN).AND.
-     &    (ZPH(I,K).LE.ZMAX).AND.(ZPH(I,K).GE.ZMIN)) Then 
+     &    (ZRC(I,K).LE.ZMAX).AND.(ZRC(I,K).GE.ZMIN)) Then 
       
       S1 = 0
       Do 302 nc = 1,NTC
@@ -349,9 +346,9 @@ C***************************************************************************C
      &        (BXY3(nc,3,1)-BXY3(nc,1,1))))
           ZIB = FR/FL+BXY3(nc,1,3)
           
-          If (ZPH(I,K).LT.ZIB) Then
+          If (ZRC(I,K).LT.ZIB) Then
               S1 = S1 + 1
-          Else If (ZPH(I,K).EQ.ZIB) Then
+          Else If (ZRC(I,K).EQ.ZIB) Then
               S1 = 1
               Exit
           Endif
@@ -381,39 +378,8 @@ C===========================================================================C
 C         Search ghost cells and image points
 C===========================================================================C 
       
-      If (IBGCMODE.EQ.0) Then
-          Do K = 1,KBM
-          Do I = 1,IJM
-          If (IDC(I,K).EQ.1) Then  
-              Do J = 1,CELL_POLYGEN(I)
-              If ((CELL_SIDE(I,J,2).GT.0).AND.
-     &           (IDC(CELL_SIDE(I,J,2),K).LT.0.9)) Then
-                  IDC(I,K) = 2
-              Endif
-              If (K.EQ.1) Then
-                  If (IDC(I,2).LT.0.9) IDC(I,K) = 2
-              Else if (K.EQ.KBM) Then
-                  If (IDC(I,KBM-1).LT.0.9) IDC(I,K) = 2
-              Else
-                  If ((IDC(I,K-1).LT.0.9).OR.(IDC(I,K+1).LT.0.9)) 
-     &                IDC(I,K)=2
-              Endif
-              Enddo
-          
-              Do J = 1,CELL_POLYGEN(I)
-              Do N = 1,POINT_CELL(CELL_SIDE(I,J,3))
-              If ((INDEX_POINT(CELL_SIDE(I,J,3),N).GT.0).AND.
-     &           (IDC(INDEX_POINT(CELL_SIDE(I,J,3),N),K).LT.0.9)) Then
-                  IDC(I,K) = 2
-              Endif
-              Enddo
-              Enddo
-          Endif
-          Enddo
-          Enddo
-      Else If (IBGCMODE.GE.0) Then
-          Do K = 1,KBM
-          Do I = 1,IJM
+      Do K = 1,KBM
+      Do I = 1,IJM
           If (IDC(I,K).EQ.1) Then  
               Do J = 1,CELL_POLYGEN(I)
               If ((CELL_SIDE(I,J,2).GT.0).AND.
@@ -421,12 +387,12 @@ C===========================================================================C
                   IDC(CELL_SIDE(I,J,2),K) = 2
               Endif
               If (K.EQ.1) Then
-                  If (IDC(I,2).LT.0.9) IDC(I,2) = 2
+                  If (IDC(I,2).LT.0.9) IDC(I,2) = 3
               Else if (K.EQ.KBM) Then
-                  If (IDC(I,KBM-1).LT.0.9) IDC(I,KBM-1) = 2
+                  If (IDC(I,KBM-1).LT.0.9) IDC(I,KBM-1) = 4
               Else
-                  If (IDC(I,K-1).LT.0.9) IDC(I,K-1) = 2
-                  If (IDC(I,K+1).LT.0.9) IDC(I,K+1) = 2
+                  If (IDC(I,K-1).LT.0.9) IDC(I,K-1) = 4
+                  If (IDC(I,K+1).LT.0.9) IDC(I,K+1) = 3
               Endif
               Enddo
           
@@ -439,9 +405,8 @@ C===========================================================================C
               Enddo
               Enddo
           Endif
-          Enddo
-          Enddo
-      Endif
+      Enddo
+      Enddo
 
 C===========================================================================C
 C         IBM variable assignment
@@ -461,12 +426,7 @@ C===========================================================================C
           If (IDC(I,K).GT.1.9) Then
               N_GH = N_GH + 1
               IGC(N_GH,1) = I
-              IGC(N_GH,2) = K
-              ! search neighbor cells
-              Do J = 1,NNB
-                  NGC(N_GH,J,1) = NBR(I,J)
-                  NGC(N_GH,J,2) = K
-              Enddo
+              IGC(N_GH,2) = K 
           Endif
       Enddo
       Enddo
@@ -518,33 +478,48 @@ C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++C
       Enddo
       Enddo
       
-      LA = LINE(2,2)-LINE(1,2)
-      LB = LINE(1,1)-LINE(2,1)
-      LC = LINE(1,2)*LINE(2,1)-LINE(2,2)*LINE(1,1)
-      XIM = (-2*LA*LC+(LB**2-LA**2)*CXY(IGC(N,1),1)
-     &       -2*LA*LB*CXY(IGC(N,1),2))/(LA**2+LB**2)
-      YIM = (-2*LB*LC+(LA**2-LB**2)*CXY(IGC(N,1),2)
-     &       -2*LA*LB*CXY(IGC(N,1),1))/(LA**2+LB**2)
-			
-      If (IBGCMODE.EQ.0) Then
-          PGC(N,1) = XIM
-          PGC(N,2) = YIM
-          PGC(N,3) = ZPH(IGC(N,1),IGC(N,2))
-          PGC(N,4) = NBMIN
-          PGC(N,5) = NPMIN
-          PGC(N,6) = Abs(LA*PGC(N,1)+LB*PGC(N,2)+LC)
-     &              /Sqrt(LA**2+LB**2)
-      Else if (IBGCMODE.EQ.1) Then
-          PGC(N,1) = 1.5*CXY(IGC(N,1),1) - 0.5*XIM
-          PGC(N,2) = 1.5*CXY(IGC(N,1),2) - 0.5*YIM
-          PGC(N,3) = ZPH(IGC(N,1),IGC(N,2))
-          PGC(N,4) = NBMIN
-          PGC(N,5) = NPMIN
-          PGC(N,6) = Abs(LA*PGC(N,1)+LB*PGC(N,2)+LC)
-     &              /Sqrt(LA**2+LB**2)
+      If (IDC(IGC(N,1),IGC(N,2)).EQ.2) Then
+          LA = LINE(2,2)-LINE(1,2)
+          LB = LINE(1,1)-LINE(2,1)
+          LC = LINE(1,2)*LINE(2,1)-LINE(2,2)*LINE(1,1)
+          XIM = (-2*LA*LC+(LB**2-LA**2)*CXY(IGC(N,1),1)
+     &         -2*LA*LB*CXY(IGC(N,1),2))/(LA**2+LB**2)
+          YIM = (-2*LB*LC+(LA**2-LB**2)*CXY(IGC(N,1),2)
+     &         -2*LA*LB*CXY(IGC(N,1),1))/(LA**2+LB**2)
+          ZIM = ZRC(IGC(N,1),IGC(N,2))
+          
+          IPX = 1.5*CXY(IGC(N,1),1) - 0.5*XIM
+          IPY = 1.5*CXY(IGC(N,1),2) - 0.5*YIM
+          IPZ = ZIM
+          IPK = IGC(N,2)
+          IPDIS = Abs(LA*IPX+LB*IPY+LC) / Sqrt(LA**2+LB**2)
+          IPCOS = LA / Sqrt(LA**2+LB**2)
+          IPSIN = LB / Sqrt(LA**2+LB**2)
+      Else if (IDC(IGC(N,1),IGC(N,2)).GE.3) Then
+          XIM = CXY(IGC(N,1),1)
+          YIM = CXY(IGC(N,1),2)
+          IPX = XIM
+          IPY = YIM
+          If (IDC(IGC(N,1),IGC(N,2)).EQ.3) Then
+              If (IGC(N,2).GT.1) IPK = IGC(N,2) + 1
+          Else if (IDC(IGC(N,1),IGC(N,2)).EQ.4) Then
+              If (IGC(N,2).LT.KBM) IPK = IGC(N,2) - 1
+          Endif  
+          IPZ = ZRC(IGC(N,1),IPK)
+          IPDIS = Abs(IPZ - Z2D)
+          IPCOS = 0
+          IPSIN = 1
       Endif
-      PGC(N,7) = LA / Sqrt(LA**2+LB**2)
-      PGC(N,8) = LB / Sqrt(LA**2+LB**2)
+     
+      PGC(N,1) = IPX
+      PGC(N,2) = IPY
+      PGC(N,3) = IPZ
+      PGC(N,4) = IPK
+      PGC(N,5) = NBMIN
+      PGC(N,6) = NPMIN
+      PGC(N,7) = IPDIS
+      PGC(N,8) = IPCOS
+      PGC(N,9) = IPSIN
 C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++C 
           
       Enddo
@@ -594,7 +569,7 @@ C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++C
      &                +(BXY3(m,2,1))+(BXY3(m,3,1)))/3)**2+
      &                 (CXY(IGC(N,1),2)-((BXY3(m,1,2))
      &                +(BXY3(m,2,2))+(BXY3(m,3,2)))/3)**2+
-     &                 (ZPH(IGC(N,1),IGC(N,2))-((BXY3(m,1,3))
+     &                 (ZRC(IGC(N,1),IGC(N,2))-((BXY3(m,1,3))
      &                +(BXY3(m,2,3))+(BXY3(m,3,3)))/3)**2)
      
 		If (PDIS.LE.PDMIN) Then
@@ -623,32 +598,35 @@ C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++C
       PD = -1 * (PA*PLANE(1,1)+PB*PLANE(1,2)+PC*PLANE(1,3))
       
       TLINE = -1 * (PA*CXY(IGC(N,1),1) + PB*CXY(IGC(N,1),2)+
-     &         PC*ZPH(IGC(N,1),IGC(N,2)) + PD) /
+     &         PC*ZRC(IGC(N,1),IGC(N,2)) + PD) /
      &        (PA**2 + PB**2 + PC**2)
      
       XIM = 2*PA*TLINE + CXY(IGC(N,1),1)
       YIM = 2*PB*TLINE + CXY(IGC(N,1),2)
-      ZIM = 2*PC*TLINE + ZPH(IGC(N,1),IGC(N,2))
-     
-      If (IBGCMODE.EQ.0) Then
-          PGC(N,1) = XIM
-          PGC(N,2) = YIM
-          PGC(N,3) = ZIM
-          PGC(N,4) = NBMIN
-          PGC(N,5) = NPMIN
-          PGC(N,6) = Abs(PA*PGC(N,1)+PB*PGC(N,2)+PC*PGC(N,3)+PD)/
-     &               Sqrt(PA**2+PB**2+PC**2)
-      Else if (IBGCMODE.EQ.1) Then
-          PGC(N,1) = 1.5*CXY(IGC(N,1),1) - 0.5*XIM
-          PGC(N,2) = 1.5*CXY(IGC(N,1),2) - 0.5*YIM
-          PGC(N,3) = 1.5*ZPH(IGC(N,1),IGC(N,2)) - 0.5*ZIM
-          PGC(N,4) = NBMIN
-          PGC(N,5) = NPMIN
-          PGC(N,6) = Abs(PA*PGC(N,1)+PB*PGC(N,2)+PC*PGC(N,3)+PD)/
-     &               Sqrt(PA**2+PB**2+PC**2)
-      Endif
-      PGC(N,7) = PA / Sqrt(PA**2+PB**2+PC**2)
-      PGC(N,8) = PB / Sqrt(PA**2+PB**2+PC**2)
+      ZIM = 2*PC*TLINE + ZRC(IGC(N,1),IGC(N,2))
+      
+      IPX = 1.5*CXY(IGC(N,1),1) - 0.5*XIM
+      IPY = 1.5*CXY(IGC(N,1),2) - 0.5*YIM
+      IPZ = 1.5*ZRC(IGC(N,1),IGC(N,2)) - 0.5*ZIM
+      IPDIS = Abs(PA*XIM+PB*YIM+PC*ZIM+PD) / Sqrt(PA**2+PB**2+PC**2)
+      IPCOS = PA / Sqrt(PA**2+PB**2+PC**2)
+      IPSIN = PB / Sqrt(PA**2+PB**2+PC**2)
+      
+      ZNE = 1
+      Do While (ZRC(IGC(N,1),ZNE).GE.IPZ)
+          ZNE = ZNE + 1
+      Enddo
+      IPK = ZNE
+
+      PGC(N,1) = IPX
+      PGC(N,2) = IPY
+      PGC(N,3) = IPZ
+      PGC(N,4) = IPK
+      PGC(N,5) = NBMIN
+      PGC(N,6) = NPMIN
+      PGC(N,7) = IPDIS
+      PGC(N,8) = IPCOS
+      PGC(N,9) = IPSIN
 C+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++C
       
       Enddo

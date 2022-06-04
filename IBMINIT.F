@@ -27,7 +27,7 @@ C===========================================================================C
       Do K = 1,KBM
           Do J = 1,IJM
               IDC(I,K) = 0
-              IDP(I,K) = 0
+              ZRC(I,K) = 0
           Enddo
       Enddo
       
@@ -48,6 +48,8 @@ C===========================================================================C
       
       Do K = 1,KB
           Do I = 1,IJP
+              IDP(I,K) = 0
+              ZRP(I,K) = 0
 		    SAU(I,K) = 0
 	 	    SAV(I,K) = 0
 		    SAW(I,K) = 0
@@ -70,8 +72,8 @@ C===========================================================================C
       Write(IUPRT,'(3I16)') IBMSCHEME,IBMDOMAIN,NUMIB
       Read (IBMSET,1000) (COM(I),I = 1,80)
       Write(IUPRT,1000) (COM(I),I = 1,80)
-      Read (IBMSET,'(3I16)') IBFSCHEME,IBGCMODE,IBGCSCHEME
-      Write(IUPRT,'(3I16)') IBFSCHEME,IBGCMODE,IBGCSCHEME
+      Read (IBMSET,'(3I16)') IBFSCHEME,IBGCSCHEME,IBGCMODE
+      Write(IUPRT,'(3I16)') IBFSCHEME,IBGCSCHEME,IBGCMODE
       Read (IBMSET,1000) (COM(I),I = 1,80)
       Write(IUPRT,1000) (COM(I),I = 1,80)
       Read (IBMSET,'(2F16.8,I16)') RITP,RIFL,INFCELL
