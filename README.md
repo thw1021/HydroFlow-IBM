@@ -1,9 +1,18 @@
+## Note: 
+
+此项目是我从别处 fork 而来 ，原作者似乎已删除个人的 github 账号。
+
+I forked this project from another repo. It seemed that the original author deleted his/her GitHub account.
+
+
+
+
 HydroFlow-IBM
 ===
 本项目是计算流体力学程序HydroFlow-IBM的源代码，致力于课题项目**波流-结构物耦合的浸没边界法数值模拟研究**开发与应用。  
 程序主框架HydroFlow由上海交通大学船舶海洋与建筑工程学院张景新副教授课题组开发。HydroFlow数值模型基于非结构网格、二阶TVD格式的有限体积法建立，主要应用于具有自由表面流动的物理问题数值模拟，如近海岸洋流、河流、湖泊等自然地表水系与环境相互影响的水动力学特征研究。  
 该数值模型使用垂向坐标变换法模拟流体自由表面位置，并使用半隐式格式进行数值离散。计算程序配有雷诺平均方程模型（Reynolds-averaged Navier-Stokes，RANS）、大涡模拟（Large Eddy Simulation，LES）、分离涡模型（Detached Eddy Simulations，DES）三种湍流计算模式可供选择，同时开发离散元多孔介质模型（Discrete Element Method，DEM）、浸没边界法模型（Immersed Boundary Method，IBM）、两相流模型（Two Phase Flow Model）等功能模块，可以应用于溃坝模拟、泥沙输运模拟、水生植物群落运动模拟、波流结构物耦合模拟等项目研究。  
-更多数值模型详细内容请参考论文[An efficient 3D non-hydrostatic model for simulating near-shore breaking waves](https://github.com/sjtuluo/HydroFlow-IBM/blob/master/Documents/HydroFlow%20Model.pdf)。  
+更多数值模型详细内容请参考论文[An efficient 3D non-hydrostatic model for simulating near-shore breaking waves](https://doi.org/10.1016/j.oceaneng.2017.05.009)。  
 
 ## 程序预设文件
 程序运行之前，需读入计算网格几何信息文件并修改边界条件，同时应设置计算模型的相关参数。预设文件简要信息介绍请参考以下表格。
