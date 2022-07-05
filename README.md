@@ -1,6 +1,6 @@
 ## Note: 
 
-此项目是我从别处 fork 而来 ，原作者似乎已删除个人的 github 账号。
+此项目是我从别处 fork 而来，原作者似乎已删除个人的 GitHub 账号。
 
 I forked this project from another repo. It seemed that the original author deleted his/her GitHub account.
 
